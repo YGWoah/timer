@@ -6,6 +6,8 @@ import Login from '@/pages/Login'
 import Signup from '@/pages/Signup'
 import Dashboard from '@/pages/Dashboard'
 import SessionsPage from '@/pages/Sessions'
+import SeedDataPage from '@/pages/SeedData'
+import EnvBadge from '@/components/EnvBadge'
 import { AuthProvider, useAuth } from '@/context/AuthContext'
 import { TimerProvider } from '@/context/TimerContext'
 import { Navigate } from 'react-router-dom'
@@ -35,10 +37,13 @@ function App() {
         <DocumentTitleUpdater />
         <div className="App">
           <Navigator />
+          <EnvBadge />
           <main>
             <Routes>
               <Route path="/" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
+              {/* dev-only seeder (only mounted during development) */}
+              {import.meta.env.DEV && <Route path="/__seed" element={<SeedDataPage />} />}
               <Route
                 path="/app"
                 element={<RequireAuth><Dashboard /></RequireAuth>}
