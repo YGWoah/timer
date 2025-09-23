@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { getFocusSessionsForUser } from '@/services/focusSessions'
 import type { FocusSession } from '@/entities/focusSession'
+import { relativeTime } from '@/utils/relative'
 
 type FocusSessionWithId = FocusSession & { id: string }
 
@@ -85,8 +86,8 @@ export default function SessionsPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {s.startTime ? new Date(s.startTime).toLocaleString() : '-'}
+                      <div className="text-sm text-gray-900" title={s.startTime ? new Date(s.startTime).toLocaleString() : ''}>
+                        {s.startTime ? relativeTime(s.startTime) : '-'}
                       </div>
                     </td>
                   </tr>

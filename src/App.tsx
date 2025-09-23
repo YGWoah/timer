@@ -9,11 +9,30 @@ import SessionsPage from '@/pages/Sessions'
 import { AuthProvider, useAuth } from '@/context/AuthContext'
 import { TimerProvider } from '@/context/TimerContext'
 import { Navigate } from 'react-router-dom'
+import { useTimer } from '@/context/TimerContext'
+import { formatSeconds } from '@/utils/generators'
+import { useEffect } from 'react'
+
+function DocumentTitleUpdater() {
+  const { user } = useAuth()
+  const { elapsedSeconds } = useTimer()
+
+  useEffect(() => {
+    if (user) {
+      document.title = `Timer — ${formatSeconds(elapsedSeconds)}`
+    } else {
+      document.title = 'timer'
+    }
+  }, [user, elapsedSeconds])
+
+  return null
+}
 
 function App() {
   return (
     <AuthProvider>
       <TimerProvider>
+        <DocumentTitleUpdater />
         <div className="App">
           <Navigator />
           <main>
