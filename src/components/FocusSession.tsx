@@ -1,53 +1,62 @@
 import { useEffect, useRef, useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { saveFocusSession } from '@/services/focusSessions'
+import { useTimer } from '@/context/TimerContext'
+import { generateRandomTopic, formatSeconds } from '@/utils/generators'
+import Notice from './FocusSession/Notice'
+import TopicInput from './FocusSession/TopicInput'
+import TimerDisplay from './FocusSession/TimerDisplay'
+import Controls from './FocusSession/Controls'
 
 export default function FocusSession() {
   const { user } = useAuth()
-  const [running, setRunning] = useState(false)
   const [startTime, setStartTime] = useState<Date | null>(null)
-  const [elapsed, setElapsed] = useState(0)
   const [topic, setTopic] = useState('')
+
+  const { elapsedSeconds: elapsed, isRunning: running, start: timerStart, stop: timerStop, reset: timerReset } = useTimer()
   const timerRef = useRef<number | null>(null)
 
   useEffect(() => {
-    if (running && startTime) {
-      timerRef.current = window.setInterval(() => {
-        setElapsed(Math.floor((Date.now() - startTime.getTime()) / 1000))
-      }, 1000)
-    }
     return () => {
       if (timerRef.current) window.clearInterval(timerRef.current)
       timerRef.current = null
     }
-  }, [running, startTime])
+  }, [])
 
-  function formatSeconds(sec: number) {
-    const m = Math.floor(sec / 60)
-    const s = sec % 60
-    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
-  }
+
+  const [notice, setNotice] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+
+  useEffect(() => {
+    if (!notice) return
+    const id = window.setTimeout(() => setNotice(null), 4000)
+    return () => clearTimeout(id)
+  }, [notice])
 
   async function handleStart() {
     if (!user) return
+    if (startTime) {
+      timerStart()
+      return
+    }
     if (!topic) {
-      const t = window.prompt('Enter topic for this focus session:')
-      if (!t) return
-      setTopic(t)
+      const generated = generateRandomTopic()
+      setTopic(generated)
     }
     const now = new Date()
     setStartTime(now)
-    setRunning(true)
-    setElapsed(0)
+    timerStart()
   }
 
-  async function handleStop() {
+  async function finishSession(finalElapsed?: number) {
     if (!user || !startTime) return
-    const end = new Date()
-    const durationSeconds = Math.floor((end.getTime() - startTime.getTime()) / 1000)
-    setRunning(false)
 
-    // save to Firestore
+    let durationSeconds = typeof finalElapsed === 'number' ? finalElapsed : undefined
+    if (durationSeconds === undefined) {
+      durationSeconds = running ? timerStop() : elapsed
+    }
+
+    const end = new Date(startTime.getTime() + durationSeconds * 1000)
+
     try {
       const payload = {
         userId: user.uid,
@@ -57,65 +66,38 @@ export default function FocusSession() {
         durationSeconds,
       }
       await saveFocusSession(payload)
-      // reset
       setStartTime(null)
-      setElapsed(0)
+      timerReset()
       setTopic('')
-      alert('Focus session saved')
+      setNotice({ type: 'success', text: 'Focus session saved' })
     } catch (err: any) {
       // eslint-disable-next-line no-console
       console.error('Failed to save session', { uid: user.uid, topic, startTime, end, durationSeconds, err })
       const message = err?.code === 'permission-denied' || /permission/i.test(err?.message || '')
-        ? 'Permission denied saving session — check your Firestore security rules (ensure authenticated users can write their own sessions).' 
+        ? 'Permission denied saving session — check your Firestore security rules (ensure authenticated users can write their own sessions).'
         : 'Failed to save session. See console for details.'
-      alert(message)
+      setNotice({ type: 'error', text: message })
     }
   }
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
       <h3 className="text-xl font-semibold text-gray-900 mb-6">Focus Session</h3>
-      
       <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Topic
-          </label>
-          <input 
-            value={topic} 
-            onChange={(e) => setTopic(e.target.value)} 
-            placeholder="What will you focus on?"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
-        
-        <div className="text-center">
-          <div className="text-3xl font-mono font-bold text-gray-900 mb-1">
-            {formatSeconds(elapsed)}
-          </div>
-          <div className="text-sm text-gray-500">
-            {running ? 'Session in progress' : 'Ready to start'}
-          </div>
-        </div>
-        
-        <div className="flex justify-center">
-          {!running ? (
-            <button 
-              onClick={handleStart} 
-              disabled={!user}
-              className="px-6 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              Start Focus
-            </button>
-          ) : (
-            <button 
-              onClick={handleStop}
-              className="px-6 py-3 bg-red-600 text-white font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors"
-            >
-              Stop Focus
-            </button>
-          )}
-        </div>
+        <Notice notice={notice} />
+        <TopicInput topic={topic} onChange={setTopic} />
+  <TimerDisplay elapsed={formatSeconds(elapsed)} running={running} />
+        <Controls
+          running={running}
+          onStart={handleStart}
+          onPause={() => timerStop()}
+          onFinish={async () => {
+            const final = timerStop()
+            await finishSession(final)
+          }}
+          disabledFinish={!startTime}
+          disabledStart={!user}
+        />
       </div>
     </div>
   )

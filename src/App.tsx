@@ -7,28 +7,31 @@ import Signup from '@/pages/Signup'
 import Dashboard from '@/pages/Dashboard'
 import SessionsPage from '@/pages/Sessions'
 import { AuthProvider, useAuth } from '@/context/AuthContext'
+import { TimerProvider } from '@/context/TimerContext'
 import { Navigate } from 'react-router-dom'
 
 function App() {
   return (
     <AuthProvider>
-      <div className="App">
-        <Navigator />
-        <main>
-          <Routes>
-            <Route path="/" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route
-              path="/app"
-              element={<RequireAuth><Dashboard /></RequireAuth>}
-            />
-            <Route
-              path="/sessions"
-              element={<RequireAuth><SessionsPage /></RequireAuth>}
-            />
-          </Routes>
-        </main>
-      </div>
+      <TimerProvider>
+        <div className="App">
+          <Navigator />
+          <main>
+            <Routes>
+              <Route path="/" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route
+                path="/app"
+                element={<RequireAuth><Dashboard /></RequireAuth>}
+              />
+              <Route
+                path="/sessions"
+                element={<RequireAuth><SessionsPage /></RequireAuth>}
+              />
+            </Routes>
+          </main>
+        </div>
+      </TimerProvider>
     </AuthProvider>
   )
 }

@@ -9,7 +9,6 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!loading && !user) {
-      // not authenticated, redirect to login
       navigate('/', { replace: true })
     }
   }, [loading, user, navigate])
@@ -28,10 +27,11 @@ export default function Dashboard() {
         </h1>
         <p className="text-gray-600">Track your focus sessions and stay productive.</p>
       </div>
-      
+
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <FocusSession />
       </div>
     </div>
   )
 }
+
