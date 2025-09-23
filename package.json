@@ -11,10 +11,8 @@
     "start": "serve -s dist"
   },
   "dependencies": {
-    "firebase": "^12.3.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "react-router-dom": "^7.9.1",
     "serve": "^14.2.5"
   },
   "devDependencies": {
