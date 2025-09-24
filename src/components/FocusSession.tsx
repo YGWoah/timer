@@ -11,9 +11,8 @@ import Controls from './FocusSession/Controls'
 export default function FocusSession() {
   const { user } = useAuth()
   const [startTime, setStartTime] = useState<Date | null>(null)
-  const [topic, setTopic] = useState('')
 
-  const { elapsedSeconds: elapsed, isRunning: running, start: timerStart, stop: timerStop, reset: timerReset } = useTimer()
+  const { elapsedSeconds: elapsed, isRunning: running, start: timerStart, stop: timerStop, reset: timerReset , topic, setTopic } = useTimer()
   const timerRef = useRef<number | null>(null)
 
   useEffect(() => {
@@ -86,7 +85,7 @@ export default function FocusSession() {
       <div className="space-y-4">
         <Notice notice={notice} />
         <TopicInput topic={topic} onChange={setTopic} />
-  <TimerDisplay elapsed={formatSeconds(elapsed)} running={running} />
+        <TimerDisplay elapsed={formatSeconds(elapsed)} running={running} />
         <Controls
           running={running}
           onStart={handleStart}

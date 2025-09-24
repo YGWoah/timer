@@ -3,8 +3,9 @@ import React, { createContext, useContext, useEffect, useRef, useState } from 'r
 type TimerContextValue = {
   elapsedSeconds: number
   isRunning: boolean
+  topic: string
+  setTopic: (topic: string) => void
   start: () => void
-  // stop returns the elapsed seconds at moment of stopping
   stop: () => number
   reset: () => void
 }
@@ -13,6 +14,7 @@ const TimerContext = createContext<TimerContextValue | undefined>(undefined)
 
 const STORAGE_ELAPSED = 'timer:elapsedSeconds'
 const STORAGE_STARTED_AT = 'timer:startedAt'
+const STORAGE_TOPIC = 'timer:lastTopic'
 
 export const TimerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [elapsedSeconds, setElapsedSeconds] = useState<number>(() => {
@@ -20,6 +22,10 @@ export const TimerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return v ? parseInt(v, 10) : 0
   })
 
+  const [topic, setTopic] = useState<string>(() => {
+    const t = localStorage.getItem(STORAGE_TOPIC)
+    return t ? t : ''
+  })
   // If startedAt exists in storage it means the timer was running before reload/route change
   const startedAtStorage = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_STARTED_AT) : null
   const [isRunning, setIsRunning] = useState<boolean>(() => !!startedAtStorage)
@@ -45,6 +51,8 @@ export const TimerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (startedAtRef.current) {
       // elapsedSeconds read from storage is the base accumulated before this running period
       baseAtStartRef.current = elapsedSeconds
+      const topic = localStorage.getItem(STORAGE_TOPIC)
+      if (topic) setTopic(topic)
       startInterval()
       setIsRunning(true)
     }
@@ -71,6 +79,7 @@ export const TimerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     baseAtStartRef.current = elapsedSeconds
     startedAtRef.current = now
     localStorage.setItem(STORAGE_STARTED_AT, String(now))
+    localStorage.setItem(STORAGE_TOPIC, topic)
     setIsRunning(true)
     startInterval()
   }
@@ -87,6 +96,7 @@ export const TimerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     startedAtRef.current = null
     baseAtStartRef.current = 0
     localStorage.removeItem(STORAGE_STARTED_AT)
+    localStorage.removeItem(STORAGE_TOPIC)
     setIsRunning(false)
     if (intervalRef.current) {
       clearInterval(intervalRef.current)
@@ -107,8 +117,13 @@ export const TimerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }
 
+  useEffect(() => {
+    if (!isRunning) return
+    localStorage.setItem(STORAGE_TOPIC, topic)
+  }, [isRunning, topic])
+
   return (
-    <TimerContext.Provider value={{ elapsedSeconds, isRunning, start, stop, reset }}>
+    <TimerContext.Provider value={{ elapsedSeconds, isRunning, topic, setTopic, start, stop, reset }}>
       {children}
     </TimerContext.Provider>
   )
