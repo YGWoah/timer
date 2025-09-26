@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://focustimer.example.com/sitemap.xml
+
+# Crawl-delay (optional - set to 1 second)
+Crawl-delay: 1

@@ -1,0 +1,35 @@
+{
+  "name": "FocusTimer - Productivity Timer",
+  "short_name": "FocusTimer",
+  "description": "A simple, effective focus timer to track your work sessions and boost productivity",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3B82F6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "utilities", "business"],
+  "shortcuts": [
+    {
+      "name": "Start Timer",
+      "short_name": "Timer",
+      "description": "Start a new focus session",
+      "url": "/app",
+      "icons": []
+    },
+    {
+      "name": "View Sessions",
+      "short_name": "Sessions",
+      "description": "View your session history",
+      "url": "/sessions",
+      "icons": []
+    }
+  ]
+}

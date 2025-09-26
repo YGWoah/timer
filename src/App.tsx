@@ -38,22 +38,20 @@ function App() {
         <div className="App">
           <Navigator />
           <EnvBadge />
-          <main>
-            <Routes>
-              <Route path="/" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
-              {/* dev-only seeder (only mounted during development) */}
-              {import.meta.env.DEV && <Route path="/__seed" element={<SeedDataPage />} />}
-              <Route
-                path="/app"
-                element={<RequireAuth><Dashboard /></RequireAuth>}
-              />
-              <Route
-                path="/sessions"
-                element={<RequireAuth><SessionsPage /></RequireAuth>}
-              />
-            </Routes>
-          </main>
+          <Routes>
+            <Route path="/" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            {/* dev-only seeder (only mounted during development) */}
+            {import.meta.env.DEV && <Route path="/__seed" element={<SeedDataPage />} />}
+            <Route
+              path="/app"
+              element={<RequireAuth><Dashboard /></RequireAuth>}
+            />
+            <Route
+              path="/sessions"
+              element={<RequireAuth><SessionsPage /></RequireAuth>}
+            />
+          </Routes>
         </div>
       </TimerProvider>
     </AuthProvider>

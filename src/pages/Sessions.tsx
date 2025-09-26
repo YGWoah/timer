@@ -3,6 +3,7 @@ import { useAuth } from '@/context/AuthContext'
 import { getFocusSessionsForUser } from '@/services/focusSessions'
 import type { FocusSession } from '@/entities/focusSession'
 import { relativeTime } from '@/utils/relative'
+import SEO from '@/components/SEO'
 
 // Shadcn UI Chart components
 import {
@@ -75,9 +76,17 @@ export default function SessionsPage() {
   }, [sessions])
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4">
-        <h2 className="text-2xl font-bold text-gray-900 mb-8">Your Focus Sessions</h2>
+    <>
+      <SEO 
+        title="Sessions History - FocusTimer | Track Your Productivity Progress"
+        description="View your focus session history, analyze productivity patterns, and monitor your work progress over time with detailed charts and statistics."
+        keywords="session history, productivity analytics, focus session tracking, work progress, time analytics"
+      />
+      <main className="min-h-screen bg-gray-50 py-8" role="main">
+        <div className="max-w-4xl mx-auto px-4">
+          <header className="mb-8">
+            <h1 className="text-2xl font-bold text-gray-900">Your Focus Sessions</h1>
+          </header>
 
         {loading && (
           <div className="flex justify-center items-center py-12">
@@ -173,7 +182,8 @@ export default function SessionsPage() {
             </table>
           </div>
         )}
-      </div>
-    </div>
+        </div>
+      </main>
+    </>
   )
 }
