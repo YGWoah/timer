@@ -1,3 +1,4 @@
+import { generateRandomTopic } from '@/utils/generators'
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react'
 
 type TimerContextValue = {
@@ -74,6 +75,10 @@ export const TimerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const start = () => {
     if (isRunning) return
+    if(!topic) {
+      const randomTopic = generateRandomTopic()
+      setTopic(randomTopic)
+    }
     const now = Date.now()
     // when starting a running period, use the current elapsed as the base
     baseAtStartRef.current = elapsedSeconds
@@ -111,6 +116,7 @@ export const TimerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     startedAtRef.current = null
     localStorage.removeItem(STORAGE_STARTED_AT)
     setIsRunning(false)
+    setTopic('')
     if (intervalRef.current) {
       clearInterval(intervalRef.current)
       intervalRef.current = null
