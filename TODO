@@ -2,4 +2,9 @@
 - add responsivity for mobile 
 - add filtering for days
 - add icon(dev/prod)
-
+- when refreshing the app , the time gets doubled
+- add support for mobile ( responsive)
+- let user delete session
+- group dates by topic
+- suggest by topic 
+- the dates in session , should be in order , or  grouping by topic, date , 
