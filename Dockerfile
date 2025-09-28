@@ -3,19 +3,35 @@
 # --- Build stage ---
 FROM node:18-alpine AS builder
 
+
+# ARG local=false
+
+# # If building with --build-arg local=true set a faster registry, and echo the configured registry.
+# RUN if [ "$local" = "true" ]; then \
+#       npm config set registry https://registry.npmmirror.com/ && \
+#       echo "npm registry set to: $(npm config get registry)"; \
+#     else \
+#       echo "using default npm registry: $(npm config get registry)"; \
+#     fi
+
 # Enable Corepack to use pnpm (pnpm lockfile is present)
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
 WORKDIR /app
 
-# Copy package manifests first to leverage Docker cache
-COPY package.json pnpm-lock.yaml ./
-
-# Install dependencies using pnpm (frozen lockfile)
-RUN pnpm install --frozen-lockfile
-
-# Copy the rest of the source and build
+# Copy project files (copy everything so Docker build doesn't fail when a lockfile is missing)
 COPY . .
+
+# Install dependencies.
+# If a pnpm lockfile exists use --frozen-lockfile for reproducible installs,
+# otherwise fall back to a normal install.
+RUN if [ -f pnpm-lock.yaml ]; then \
+      pnpm install --frozen-lockfile; \
+    else \
+      pnpm install; \
+    fi
+
+# Build the project
 RUN pnpm build
 
 # --- Production stage ---
